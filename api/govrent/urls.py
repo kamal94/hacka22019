@@ -15,7 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from govrent.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('v1/complex', ListComplexes.as_view()),
+    path('v1/complex/<uuid:complex_id>', ComplexDetailView.as_view()),
+    path('v1/complex/<uuid:complex_id>/units', ComplexUnitsDetailView.as_view()),
+    path('v1/unit', ListUnits.as_view()),
+    path('v1/unit/<uuid:id>', UnitDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings', MeterReadingUnitDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings/monthly', MeterReadingUnitMonthlyDetailView.as_view()),
 ]

@@ -1,0 +1,48 @@
+[
+  {
+    "model": "govrent.complex",
+    "pk": 60,
+    "fields": {
+      "address": "1234 Fuller Street",
+    }
+  },
+  {
+    "model": "govrent.unit",
+    "pk": 35,
+    "fields": {
+      "complex": 60,
+      "address": "apt 204",
+      "beds": 3
+    }
+  },
+  {
+    "model": "govrent.meterreading",
+    "pk": 1,
+    "fields": {
+      "reading_type": "GAS",
+      "date": "2019-02-02",
+      "usage": 20.2,
+      "unit": 35
+    }
+  },
+  {
+    "model": "govrent.meterreading",
+    "pk": 1,
+    "fields": {
+      "reading_type": "ELECTRICITY",
+      "date": "2019-02-02",
+      "usage": 20.2,
+      "unit": 35
+    }
+  },
+  {
+    "model": "govrent.meterreading",
+    "pk": 1,
+    "fields": {
+      "reading_type": "WATER",
+      "date": "2019-02-02",
+      "usage": 20.2,
+      "unit": 35
+    }
+  }
+]
