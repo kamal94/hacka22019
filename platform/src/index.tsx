@@ -3,17 +3,17 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { Button, Card, Navbar, Row, Col, NavItem  } from 'react-materialize';
+import { Navbar, Row  } from 'react-materialize';
 import {BrowserRouter, Link} from 'react-router-dom';
 
 ReactDOM.render(
     <BrowserRouter>
         <div className="container">
             <Navbar alignLinks="left">
-                <NavItem >
                 <Link to="/">Home</Link>
-                </NavItem>
+                <Link to="/" className="brand-logo right"><img src="/EnergySaver3.png" width="100px" height="70px"/></Link>
             </Navbar>
+            <Row height="20px"></Row>
             <App />
         </div>
     </BrowserRouter>,

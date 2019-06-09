@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Button, Card, Navbar, Row, Col, Table, } from 'react-materialize';
-import { fetchMonthlyReadings, fetchReadings, fetchUnit } from './api';
+import { fetchMonthlyReadings, fetchUnit } from './api';
+import { Link } from 'react-router-dom'
 
 export interface IUnitMonthlyRowProps {
     unit_id,
@@ -24,13 +24,13 @@ export class UnitMonthlyRow extends React.Component<IUnitMonthlyRowProps, any> {
     }
 
     componentDidMount() {
-        fetchMonthlyReadings(this.state.unit_id, this.state.start_date, this.state.end_date, this.state.reading_type)
+        fetchMonthlyReadings(this.state.unit_id, this.state.start_date, this.state.end_date)
             .then(res => this.setState({ readings: res.data }))
         fetchUnit(this.state.unit_id).then(res => this.setState({ unit: res.data }))
     }
 
     isLoaded() {
-        return (this.state.unit != null && this.state.reading != [])
+        return (this.state.unit !== null && this.state.reading !== [])
     }
 
     public render() {
@@ -43,7 +43,7 @@ export class UnitMonthlyRow extends React.Component<IUnitMonthlyRowProps, any> {
             return (
                 <tr>
                     <td>
-                        {this.state.unit.address}
+                        <Link to={"/unit/"+this.state.unit_id}>{this.state.unit.address}</Link>
                     </td>
                     <td>
                         {this.state.unit.bed_number}

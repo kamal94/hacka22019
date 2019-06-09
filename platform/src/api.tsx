@@ -1,7 +1,7 @@
 import axios from 'axios';
 const IP = 'http://127.0.0.1:8000';
 
-export const fetchComplexes = async () => {
+export const fetchComplexes = () => {
     return axios.get(
         IP+'/v1/complex',
         {
@@ -14,21 +14,19 @@ export const fetchComplexes = async () => {
     )
 }
 
-export const fetchComplex = async (complex_id) => {
-    return axios.get(
-        IP+'/v1/complex/'+complex_id,
-        {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-                'Authorization': 'Basic ' + btoa('kamal:123456'),
-            }
+export const fetchComplex = (complex_id) => axios.get(
+    IP+'/v1/complex/'+complex_id,
+    {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            'Authorization': 'Basic ' + btoa('kamal:123456'),
         }
-    )
-}
+    }
+)
 
 
-export const fetchComplexUnits = async (complex_id) => {
+export const fetchComplexUnits = (complex_id) => {
     return axios.get(
         IP+'/v1/complex/'+complex_id+'/units',
         {
@@ -41,7 +39,7 @@ export const fetchComplexUnits = async (complex_id) => {
     )
 }
 
-export const fetchUnit = async (unit_id) => {
+export const fetchUnit = (unit_id) => {
     return axios.get(
         IP+'/v1/unit/'+unit_id,
         {
@@ -55,9 +53,22 @@ export const fetchUnit = async (unit_id) => {
 }
 
 
-export const fetchReadings = async (unit_id, start_date, end_date, reading_type) => {
+export const fetchReadings = (unit_id, start_date, end_date, reading_type) => {
     return axios.get(
-        IP+'/v1/unit/'+unit_id+'/readings?'+'start_date='+start_date+'&end_date='+end_date+'&reading_type='+reading_type,
+        IP+'/v1/unit/'+unit_id+'/readings?start_date='+start_date+'&end_date='+end_date+'&reading_type='+reading_type,
+        {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Basic ' + btoa('kamal:123456'),
+            }
+        }
+    )
+}
+
+export const fetchDailyGasReadings = (unit_id, start_date, end_date) => {
+    return axios.get(
+        IP+'/v1/unit/'+unit_id+'/readings/gas?start_date='+start_date+'&end_date='+end_date,
         {
             method: 'GET',
             headers: {
@@ -69,9 +80,37 @@ export const fetchReadings = async (unit_id, start_date, end_date, reading_type)
 }
 
 
-export const fetchMonthlyReadings = async (unit_id, start_date, end_date, reading_type) => {
+export const fetchDailyElectricityReadings = (unit_id, start_date, end_date) => {
     return axios.get(
-        IP+'/v1/unit/'+unit_id+'/readings/monthly?'+'start_date='+start_date+'&end_date='+end_date+'&reading_type='+reading_type,
+        IP+'/v1/unit/'+unit_id+'/readings/electricity?start_date='+start_date+'&end_date='+end_date,
+        {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Basic ' + btoa('kamal:123456'),
+            }
+        }
+    )
+}
+
+
+export const fetchDailyTotalReadings = (unit_id, start_date, end_date) => {
+    return axios.get(
+        IP+'/v1/unit/'+unit_id+'/readings/total?start_date='+start_date+'&end_date='+end_date,
+        {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Basic ' + btoa('kamal:123456'),
+            }
+        }
+    )
+}
+
+
+export const fetchMonthlyReadings = (unit_id, start_date, end_date) => {
+    return axios.get(
+        IP+'/v1/unit/'+unit_id+'/readings/total/monthly?start_date='+start_date+'&end_date='+end_date,
         {
             method: 'GET',
             headers: {

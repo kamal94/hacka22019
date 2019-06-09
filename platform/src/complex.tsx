@@ -1,15 +1,11 @@
 import React from 'react';
 import './App.css';
-import './.d.ts';
-import { Button, Card, Navbar, Row, Col, Table, } from 'react-materialize';
-import { complexes, units, monthly } from './dummy';
-import { RouteComponentProps } from 'react-router-dom';
+import { Row, Col, Table, } from 'react-materialize';
 import { fetchComplex, fetchComplexUnits } from './api';
 import { UnitMonthlyRow } from './unit-monthly-row';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import DatePicker from "react-datepicker";
- 
 import "react-datepicker/dist/react-datepicker.css";
 
 export class Complex extends React.Component<{ matches }, any> {
@@ -19,23 +15,20 @@ export class Complex extends React.Component<{ matches }, any> {
             complex: null,
             complex_id: props.match.params.id,
             units: [],
-            start_date: "",
-            end_date:""
+            start_date: moment().subtract(12, 'months'),
+            end_date: moment()
         }
         this.handleStartDateChange = this.handleStartDateChange.bind(this);
         this.handleEndDateChange = this.handleEndDateChange.bind(this);
     }
 
     handleStartDateChange(date) {
-        console.log("start date:", date);
         this.setState({
             start_date: date
         })
     }
 
     handleEndDateChange(date) {
-        console.log("end date:", date);
-
         this.setState({
             end_date: date
         })
@@ -56,29 +49,52 @@ export class Complex extends React.Component<{ matches }, any> {
             )
     }
 
+    createDateRange() {
+        let counter = moment(this.state.start_date).startOf('month');
+        let dates = [JSON.parse(JSON.stringify(counter))];
+        console.log("counter");
+        while (counter.isBefore(this.state.end_date)) {
+            console.log(counter);
+            dates.push(moment(JSON.parse(JSON.stringify(counter))));
+            counter.add(1, 'month');
+        }
+        console.log(dates);
+        return dates;
+    }
+
     isLoaded() {
-        return (this.state.complex != null && units != [])
+        return (this.state.complex !== null && this.state.units !== [])
     }
     render() {
         if (this.isLoaded()) {
             const unit_rows = this.state.units.map(unit =>
                 <UnitMonthlyRow 
                 unit_id={unit.id} 
-                start_date={this.state.start_date} 
-                end_date={this.state.end_date} 
+                start_date={moment(this.state.start_date).format("YYYY-MM-DD")} 
+                end_date={moment(this.state.end_date).format("YYYY-MM-DD")} 
                 reading_type="" 
                 />
             );
+            const dates = this.createDateRange();
+            const date_columns = dates.map(date =>
+                <th> { moment(date).format("MMM YYYY") } </th>
+            );
+
             return (
                 <div>
                     <Row>
-                        <h2>{this.state.complex.address}</h2>
+                        <Col s={4}>
+                            <img width="400px" height="200px" src={"/"+this.state.complex.image}/>
+                        </Col>
+                        <Col s={4}>
+                            <h2>{this.state.complex.address}</h2>
+                        </Col>
                     </Row>
                     <Row>
                         <Col s={3}> 
                             <div>Start Date</div> <div> 
                                 <DatePicker
-                                    selected={this.state.start_date}
+                                    selected={new Date(moment(this.state.start_date).format("YYYY-MM-DD"))}
                                     onChange={this.handleStartDateChange}/>
                             </div>
                         </Col>
@@ -86,7 +102,7 @@ export class Complex extends React.Component<{ matches }, any> {
                         <Col s={3}> 
                             <div>End Date</div> <div> 
                                 <DatePicker
-                                    selected={this.state.end_date}
+                                    selected={new Date(moment(this.state.end_date).format("YYYY-MM-DD"))}
                                     onChange={this.handleEndDateChange}/>
                             </div>
                         </Col>
@@ -104,6 +120,7 @@ export class Complex extends React.Component<{ matches }, any> {
                                     <th data-field="price">
                                         Allowance
                                     </th>
+                                    {date_columns}
                                 </tr>
                             </thead>
                             <tbody>

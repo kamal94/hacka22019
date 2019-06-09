@@ -5,36 +5,45 @@ import datetime
 from dateutils import relativedelta
 
 
-complex_names = [
-    "1234 fuller park",
-    "1234 main street",
-    "1234 ann arbor street",
-    "1234 washington ave",
-    "1234 crumble patch"
-]
+complex_names = {
+    "717 N Maple":  "717.jpeg",
+    "Hikone 2724": "hikone.jpg",
+    "1737 Green Rd": "green.jpg",
+    "221 S 7th St": "7th.jpg",
+    "727 Miller Ave": "miller.jpg"
+}
 
 complexes = [
     {
         "address": name,
         "id": str(uuid.uuid4()),
-        "allowance": random.randint(150, 300)
+        "allowance": random.randint(150, 300),
+        "image": image
     }
-    for name in complex_names
+    for name, image in complex_names.items()
 ]
 
 
 units = []
 num_units_for_complex = 12
-for _ in range(num_units_for_complex):
+unit_allowances = {
+    1: 100,
+    2: 134,
+    3: 167,
+    4: 204,
+    5: 227,
+}
+for complex in complexes:
+    bed_numbers = random.randint(1, 5)
     units += [
         {
             "id": str(uuid.uuid4()),
             "unit_complex": complex['id'],
-            "bed_number": random.randint(1, 6),
+            "bed_number": bed_numbers,
             "address": complex['address'] + ' ' + str(random.randint(100, 500)),
-            "allowance": complex['allowance']
+            "allowance": unit_allowances[bed_numbers]
         }
-        for complex in complexes
+        for _ in range(random.randint(5, num_units_for_complex))
     ]
 
 gas_readings = []
@@ -46,7 +55,7 @@ for day in range(365):
         {
             "id": str(uuid.uuid4()),
             "unit": str(unit['id']),
-            "usage": random.randint(100,10000)/100,
+            "usage": random.randint(100,7000)/100,
             "reading_type": "GAS",
             "date": date.strftime("%Y-%m-%d")
         }
@@ -56,7 +65,7 @@ for day in range(365):
         {
             "id": str(uuid.uuid4()),
             "unit": str(unit['id']),
-            "usage": random.randint(100,10000)/100,
+            "usage": random.randint(100,7000)/100,
             "reading_type": "ELECTRICITY",
             "date": date.strftime("%Y-%m-%d")
         }
@@ -84,7 +93,8 @@ complex_models = [
       "model": "govrent.UnitComplex",
       "pk": complex['id'],
       "fields": {
-        "address": complex['address']
+        "address": complex['address'],
+        "image": complex["image"]
       }
     }
     for complex in complexes

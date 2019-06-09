@@ -7,6 +7,28 @@ from govrent.serializers import *
 import datetime
 from dateutils import relativedelta
 
+
+def get_end_date(request):
+    end_date = request.GET.get(
+        'end_date',
+        datetime.datetime.now()
+    ) or datetime.datetime.now()
+    if not isinstance(end_date, datetime.datetime):
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+    return end_date.replace(day=1)
+
+
+def get_start_date(request):
+    start_date = request.GET.get(
+        'start_date',
+        datetime.datetime.now() - relativedelta(years=1)
+    ) or datetime.datetime.now() - relativedelta(years=1)
+    if not isinstance(start_date, datetime.datetime):
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+
+    return start_date.replace(day=1)
+
+
 class ListComplexes(APIView):
     """
     View to list all users in the system.
@@ -31,7 +53,6 @@ class ListComplexes(APIView):
                 "Access-Control-Allow-Headers": "*"
             })
 
-    
     def post(self, request):
         """
         Creates a new complex.
@@ -58,6 +79,7 @@ class ComplexDetailView(APIView):
         serializer = UnitComplexSerializer(unit_complex)
         return Response(serializer.data)
 
+
 class ComplexUnitsDetailView(APIView):
     """
     View to get a complex in the.
@@ -76,7 +98,6 @@ class ComplexUnitsDetailView(APIView):
         return Response(serializer.data)
 
 
-
 class ListUnits(APIView):
     """
     View to list all users in the system.
@@ -92,9 +113,9 @@ class ListUnits(APIView):
         """
         units = Unit.objects.all()
         serializer = UnitSerializer(units, many=True)
-        
+
         return Response(serializer.data)
-    
+
     def post(self, request):
         """
         Creates a new complex.
@@ -124,8 +145,7 @@ class UnitDetailView(APIView):
         return Response(serializer.data)
 
 
-
-class MeterReadingUnitDetailView(APIView):
+class TotalMeterReadingDetailView(APIView):
     """
     View to get a units with an id.
 
@@ -138,37 +158,58 @@ class MeterReadingUnitDetailView(APIView):
         """
         Return unit by id.
         """
-        start_date = request.GET.get(
-            'start_date',
-            datetime.datetime.now() - relativedelta(years=1)
-        ) or datetime.datetime.now() - relativedelta(years=1)
-        end_date = request.GET.get(
-            'end_date',
-            datetime.datetime.now()
-        ) or datetime.datetime.now()
-        reading_type = str(request.GET.get(
-            'reading_type',
-            ''
-        )).upper()
-        print(reading_type)
-        if reading_type:
-            readings = MeterReading.objects.filter(
-                unit=unit_id,
-                date__gte=start_date,
-                date__lte=end_date,
-                reading_type=reading_type
-                )
-        else:
-            readings = MeterReading.objects.filter(
-                unit=unit_id,
-                date__gte=start_date,
-                date__lte=end_date
-                )
+        start_date = get_start_date(request)
+        end_date = get_end_date(request)    
+        readings = MeterReading.objects.filter(
+            unit=unit_id,
+            date__gte=start_date,
+            date__lte=end_date
+        )
+        result = []
+        while(start_date < end_date):
+            # add elec and water
+            day_readings = list(filter(
+                lambda x: datetime.datetime(year=x.date.year, month=x.date.month, day=x.date.day) == start_date,
+                readings
+            ))
+            print(day_readings)
+            if len(day_readings) == 2:
+                total_reading = {
+                    "unit": str(day_readings[0].unit.id),
+                    "charge": day_readings[0].charge + day_readings[1].charge,
+                    "date": day_readings[0].date
+                }
+                result.append(total_reading)
+            start_date += relativedelta(days=1)
+        return JsonResponse(result, safe=False)
+
+
+class ElectricityMeterReadingDetailView(APIView):
+    """
+    View to get a units with an id.
+
+    * Requires token authentication.
+    * Only admin users are able to access this view.
+    """
+    # permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request, unit_id):
+        """
+        Return unit by id.
+        """
+        start_date = get_start_date(request)
+        end_date = get_end_date(request)
+        readings = MeterReading.objects.filter(
+            unit=unit_id,
+            date__gte=start_date,
+            date__lte=end_date,
+            reading_type='ELECTRICITY'
+        )
         serializer = MeterReadingSerializer(readings, many=True)
         return Response(serializer.data)
 
 
-class MeterReadingUnitMonthlyDetailView(APIView):
+class GasMeterReadingDetailView(APIView):
     """
     View to get a units with an id.
 
@@ -181,42 +222,109 @@ class MeterReadingUnitMonthlyDetailView(APIView):
         """
         Return unit by id.
         """
-        start_date = request.GET.get(
-            'start_date',
-            datetime.datetime.now() - relativedelta(years=1)
-        ) or datetime.datetime.now() - relativedelta(years=1)
-        start_date = start_date.replace(day=1)
-        end_date = request.GET.get(
-            'end_date',
-            datetime.datetime.now()
-        ) or datetime.datetime.now()
-        start_date = start_date.replace(day=1)
+        start_date = get_start_date(request)
+        end_date = get_end_date(request)
+        readings = MeterReading.objects.filter(
+            unit=unit_id,
+            date__gte=start_date,
+            date__lte=end_date,
+            reading_type='GAS'
+        )
+        serializer = MeterReadingSerializer(readings, many=True)
+        return Response(serializer.data)
 
-        reading_type = str(request.GET.get(
-            'reading_type',
-            ''
-        )).upper()
 
+
+class GasMeterReadingMonthlyDetailView(APIView):
+    """
+    View to get a units with an id.
+
+    * Requires token authentication.
+    * Only admin users are able to access this view.
+    """
+    # permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request, unit_id):
+        """
+        Return unit by id.
+        """
+        start_date = get_start_date(request)
+        end_date = get_end_date(request)
         months = {}
-        while(start_date < end_date):
-            if reading_type:
-                first_of_month = start_date.replace(day=1)
-                last_of_month = start_datereplace(day=1) + relativedelta(months=1) - relativedelta(days=1)
-                readings_sum = MeterReading.objects.filter(
-                    date__gte=first_of_month,
-                    date__lte=last_of_month,
-                    reading_type=reading_type
-                ).aggregate(Sum('usage'))
-                months[start_date.strftime("%Y-%m-%d")] = round(readings_sum['usage__sum'], 0)
-            else:
+        while(start_date <= end_date):
+            first_of_month = start_date.replace(day=1)
+            last_of_month = start_date.replace(
+                day=1) + relativedelta(months=1) - relativedelta(days=1)
+            readings_sum = MeterReading.objects.filter(
+                date__gte=first_of_month,
+                date__lte=last_of_month,
+                unit=unit_id,
+                reading_type='GAS'
+            ).aggregate(Sum('usage'))
+            months[start_date.strftime(
+                "%Y-%m-%d")] = round(readings_sum['usage__sum']*.06, 0)
+            start_date += relativedelta(months=1)
+        return JsonResponse(months, safe=False)
 
-                first_of_month = start_date.replace(day=1)
-                last_of_month = start_date.replace(day=1) + relativedelta(months=1) - relativedelta(days=1)
-                readings_sum = MeterReading.objects.filter(
-                    date__gte=first_of_month,
-                    date__lte=last_of_month,
-                ).aggregate(Sum('usage'))
-                months[start_date.strftime("%Y-%m-%d")] = round(readings_sum['usage__sum'], 0)
-            
+
+class ElectricityMeterReadingMonthlyDetailView(APIView):
+    """
+    View to get a units with an id.
+
+    * Requires token authentication.
+    * Only admin users are able to access this view.
+    """
+    # permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request, unit_id):
+        """
+        Return unit by id.
+        """
+        start_date = get_start_date(request)
+        end_date = get_end_date(request)
+        months = {}
+        while(start_date <= end_date):
+            first_of_month = start_date.replace(day=1)
+            last_of_month = start_date.replace(
+                day=1) + relativedelta(months=1) - relativedelta(days=1)
+            readings_sum = MeterReading.objects.filter(
+                date__gte=first_of_month,
+                date__lte=last_of_month,
+                unit=unit_id,
+                reading_type='ELECTRICITY'
+            ).aggregate(Sum('usage'))
+            months[start_date.strftime(
+                "%Y-%m-%d")] = round(readings_sum['usage__sum']*.06, 0)
+            start_date += relativedelta(months=1)
+        return JsonResponse(months, safe=False)
+
+
+class TotalMeterReadingMonthlyDetailView(APIView):
+    """
+    View to get a units with an id.
+
+    * Requires token authentication.
+    * Only admin users are able to access this view.
+    """
+    # permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request, unit_id):
+        """
+        Return unit by id.
+        """
+        start_date = get_start_date(request)
+        end_date = get_end_date(request)
+        months = {}
+        while(start_date <= end_date):
+            first_of_month = start_date.replace(day=1)
+            last_of_month = start_date.replace(
+                day=1) + relativedelta(months=1) - relativedelta(days=1)
+            readings_sum = MeterReading.objects.filter(
+                date__gte=first_of_month,
+                date__lte=last_of_month,
+                unit=unit_id
+            ).aggregate(Sum('usage'))
+            months[start_date.strftime(
+                "%Y-%m-%d")] = round(readings_sum['usage__sum']*.06, 0)
             start_date += relativedelta(months=1)
         return JsonResponse(months, safe=False)

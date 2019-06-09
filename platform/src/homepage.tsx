@@ -1,13 +1,11 @@
 import React from 'react';
 import './App.css';
-import './.d.ts';
-import { Button, Card, Navbar, Row, Col, NavItem } from 'react-materialize';
-import { complexes, units } from './dummy';
+import { Card, CardTitle, Row, Col} from 'react-materialize';
 import { fetchComplexes } from './api';
 
 
-export class Homepage extends React.Component<{},{complexes:any, isLoaded: boolean}> {
-  
+export class Homepage extends React.Component<{}, { complexes: any, isLoaded: boolean }> {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -18,30 +16,31 @@ export class Homepage extends React.Component<{},{complexes:any, isLoaded: boole
 
   componentDidMount() {
     return fetchComplexes()
-    .then((response) => {
-      console.log("complexes:");
-      console.log(response);
-      this.setState({complexes: response.data, isLoaded: true})
-    })
+      .then((response) => {
+        console.log("complexes:");
+        console.log(response);
+        this.setState({ complexes: response.data, isLoaded: true })
+      })
   }
-  
+
   render() {
 
 
     if (this.state.isLoaded) {
       const complex_divs = this.state.complexes.map((complex) => {
         return (
-          <Col s={4}>
-            <Card>
-              <a href={'/complex/' + complex.id}>
+          <Col s={12} m={6} l={3}>
+            <a href={'/complex/' + complex.id}>
+              <Card className="hoizontal"
+                header={<CardTitle image={'/' + complex.image}></CardTitle>}>
                 <div className="card-content">
                   <div className="card-title"> {complex.address} </div>
                   <div className="card-content"> {complex.num_units} apartments</div>
                 </div>
-              </a>
-            </Card>
+              </Card>
+            </a>
           </Col>)
-        }
+      }
       )
       return (
         <Row>

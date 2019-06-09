@@ -16,6 +16,7 @@
     "react-materialize": "^3.3.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
+    "recharts": "^1.6.2",
     "typescript": "3.5.1"
   },
   "scripts": {

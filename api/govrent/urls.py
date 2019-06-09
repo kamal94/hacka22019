@@ -24,6 +24,10 @@ urlpatterns = [
     path('v1/complex/<uuid:complex_id>/units', ComplexUnitsDetailView.as_view()),
     path('v1/unit', ListUnits.as_view()),
     path('v1/unit/<uuid:id>', UnitDetailView.as_view()),
-    path('v1/unit/<uuid:unit_id>/readings', MeterReadingUnitDetailView.as_view()),
-    path('v1/unit/<uuid:unit_id>/readings/monthly', MeterReadingUnitMonthlyDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings/gas', GasMeterReadingDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings/electricity', ElectricityMeterReadingDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings/total', TotalMeterReadingDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings/gas/monthly', GasMeterReadingMonthlyDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings/electricity/monthly', ElectricityMeterReadingMonthlyDetailView.as_view()),
+    path('v1/unit/<uuid:unit_id>/readings/total/monthly', TotalMeterReadingMonthlyDetailView.as_view()),
 ]
